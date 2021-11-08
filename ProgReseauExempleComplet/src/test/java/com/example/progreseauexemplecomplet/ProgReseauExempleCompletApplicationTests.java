@@ -7,11 +7,13 @@ import org.springframework.boot.web.server.LocalServerPort;
 import static io.restassured.RestAssured.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ProgReseauExempleCompletApplicationTests {
+public class ProgReseauExempleCompletApplicationTests
+{
     @LocalServerPort
     private int port;
     @Test
-    public void getPersons() {
+    public void getPersons()
+    {
         baseURI = "http://localhost:8080";
         given().
                 port(port).
