@@ -21,13 +21,13 @@ paths:
                 type: array
                 example:
                 - id: 1
-                  firstName: tobi
-                  lastName: uchiha
-                  age: 24
+                  firstName: toto
+                  lastName: toto
+                  age: 22
                 - id: 2
-                  firstName: toba
-                  lastName: uchihi
-                  age: 33
+                  firstName: tata
+                  lastName: tata
+                  age: 45
                 items:
                   $ref: '#/components/schemas/Person'
 components:

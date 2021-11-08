@@ -1,25 +1,63 @@
 package com.example.progreseauexemplecomplet;
 
+import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
-import static io.restassured.RestAssured.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ProgReseauExempleCompletApplicationTests
-{
-    @LocalServerPort
-    private int port;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+@Testcontainers
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import({ProgReseauExempleCompletApplication.class})
+public class ProgReseauExempleCompletApplicationTests {
+    @Autowired
+    private PersonRepository personRepository;
+    //@Autowired
+    //private PersonPersistenceAdapter personPersistenceAdapter;
+    private ProgReseauExempleCompletApplication personPersistenceAdapter = new ProgReseauExempleCompletApplication(personRepository);
+
+    /* @Container
+     public GenericContainer postgres = new GenericContainer(DockerImageName.parse("postgres:13"))
+             .withExposedPorts(5432,5432).withEnv("POSTGRES_PASSWORD","root");*/
+    @ClassRule
+    @Container
+    public static PostgreSQLContainer conteneur = (PostgreSQLContainer) new PostgreSQLContainer(DockerImageName.parse("postgres:13")).
+            withPassword("root").
+            withDatabaseName("postgres").
+            withUsername("postgres");
+
     @Test
-    public void getPersons()
-    {
-        baseURI = "http://localhost:8080";
-        given().
-                port(port).
-                get("/persons").
-        then().
-                statusCode(200).
-                log().all();
+    @Sql({"createTable.sql","PersonPersistenceAdapterTests.sql"})
+    void getAllPersons(){
+        conteneur.start();
+        Map<String, Object> map = new HashMap<>();
+        ArrayList<Person> pers;
+
+        map = personPersistenceAdapter.getPersons();
+
+        pers = (ArrayList<Person>)map.get("personnes");
+
+
+        System.out.println(pers.get(1).getFirstName());
+
+        assertEquals("tata1",pers.get(1).getFirstName());
+        assertEquals("tutu1",pers.get(1).getLastName());
+        assertEquals(21,pers.get(1).getAge());
+
     }
 }
